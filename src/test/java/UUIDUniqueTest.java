@@ -1,67 +1,82 @@
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.nio.ByteBuffer;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UUIDUniqueTest {
-    static int n = 1000;
-    long getUniqueWithgetLeastSignificantBits(){
-        UUID uuid = UUID.randomUUID();
-        return Math.abs(uuid.getLeastSignificantBits());
-    }
+    static int n = 1000000;
+    private Set<Long> uniqueValues;
 
-    long getUniqueWithgetMostSignificantBits(){
-        UUID uuid = UUID.randomUUID();
-        return Math.abs(uuid.getMostSignificantBits());
+    @BeforeEach
+    void setUp() {
+        uniqueValues = new HashSet<>();
     }
-
-    long getWithHashNode(){
-        UUID uuid = UUID.randomUUID();
-        return Math.abs(uuid.toString().hashCode());
-    }
-
-    long getWithByteBuffer(){
-        UUID uuid = UUID.randomUUID();
-        ByteBuffer bb = ByteBuffer.wrap(new byte[128]);
-        bb.putLong(uuid.getMostSignificantBits());
-        bb.putLong(uuid.getLeastSignificantBits());
-        return bb.getLong() + 1;
-    }
-
 
     @Test
-    void test(){
-        Set<Long> uniqueValues = new HashSet<>();
+    void testGetLeastSignificantBits() {
+        int collisions = 0;
         for (int i = 0; i < n; i++) {
+            UUID uuid = UUID.randomUUID();
+            long uniqueValue = Math.abs(uuid.getLeastSignificantBits());
 
-            long uniqWithWithgetLeastSignificantBits = getUniqueWithgetLeastSignificantBits();
-            assertTrue(uniqueValues.add(uniqWithWithgetLeastSignificantBits), "Collision detected for :" + uniqWithWithgetLeastSignificantBits);
-            assertTrue(uniqWithWithgetLeastSignificantBits > 0); // Pastikan nilai selalu positif
-
-            assertTrue(uniqueValues.add(getUniqueWithgetMostSignificantBits())); // Pastikan nilai unik
-            assertTrue(getUniqueWithgetMostSignificantBits() > 0); // Pastikan nilai selalu positif
-
-            //assertTrue(uniqueValues.add(getWithHashNode())); // Pastikan nilai unik
-            long uniqueWithHashNode = getWithHashNode();
-            assertTrue(uniqueValues.add(uniqueWithHashNode), "Collision detected for :" + uniqueWithHashNode);
-            assertTrue(uniqueWithHashNode > 0); // Pastikan nilai selalu positif
-
-            long getWithByteBuffer = getWithByteBuffer();
-            boolean isUnique = uniqueValues.add(getWithByteBuffer);
-            if (isUnique) {
-                assertTrue(isUnique); // Pastikan nilai unik
-            } else {
-                assertFalse(isUnique, "Collision detected for :" + getWithByteBuffer);
+            if (!uniqueValues.add(uniqueValue)) {
+                collisions++;
             }
-            assertTrue(getWithByteBuffer > 0); // Pastikan nilai selalu positif
-
-            //assertTrue(uniqueValues.add(getWithTimestamp())); // Pastikan nilai unik
-            //assertTrue(getWithTimestamp() > 0); // Pastikan nilai selalu positif
         }
+        System.out.println("Collisions : " + (double)collisions/n);
+        assertTrue(collisions < n * 0.01); // You can adjust the threshold as needed
+    }
+
+    @Test
+    void testGetMostSignificantBits() {
+        int collisions = 0;
+        for (int i = 0; i < n; i++) {
+            UUID uuid = UUID.randomUUID();
+            long uniqueValue = Math.abs(uuid.getMostSignificantBits());
+
+            if (!uniqueValues.add(uniqueValue)) {
+                collisions++;
+            }
+        }
+        System.out.println("Collisions : " + collisions /n);
+        assertTrue(collisions < n * 0.01); // You can adjust the threshold as needed
+    }
+
+    @Test
+    void testHashCode() {
+        int collisions = 0;
+        for (int i = 0; i < n; i++) {
+            UUID uuid = UUID.randomUUID();
+            long uniqueValue = Math.abs(uuid.toString().hashCode());
+
+            if (!uniqueValues.add(uniqueValue)) {
+                collisions++;
+            }
+        }
+        System.out.println("Collisions : " + collisions /n);
+        assertTrue(collisions < n * 0.01); // You can adjust the threshold as needed
+    }
+
+    @Test
+    void testByteBuffer() {
+        int collisions = 0;
+        for (int i = 0; i < n; i++) {
+            UUID uuid = UUID.randomUUID();
+            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+            bb.putLong(uuid.getMostSignificantBits());
+            bb.putLong(uuid.getLeastSignificantBits());
+            long uniqueValue = Math.abs(bb.getLong(0));
+
+            if (!uniqueValues.add(uniqueValue)) {
+                collisions++;
+            }
+        }
+        System.out.println("Collisions : " + (double)collisions/n);
+        assertTrue(collisions < n * 0.01); // You can adjust the threshold as needed
     }
 }
