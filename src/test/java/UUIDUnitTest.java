@@ -1,99 +1,87 @@
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UUIDUnitTest {
 
-    static int n = 1000000;
+    final static int n = 1000000;
+    final static double threshold = 0.001;
+    UniqueUUIDGenerator uniqueUUIDGenerator;
 
-    @Test
-    void whenGenerateWithgetLeastSignificantBits_thenCollisionsProbabilityCheck() {
-        Set<Long> uniqueValues = new HashSet<>();
-        int collisions = 0;
-        for (int i = 0; i < n; i++) {
-            UUID uuid = UUID.randomUUID();
-            long uniqueValue = Math.abs(uuid.getLeastSignificantBits());
-            assertTrue(uniqueValue > 0);
-            if (!uniqueValues.add(uniqueValue)) {
-                collisions++;
-            }
-        }
-        // assertTrue(collisions > 0);
-        //int uniqueCount = uniqueValues.size();
-        System.out.println("-------------------------------");
-        System.out.println("LeastSignificantBits");
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format((double)collisions/n));
+    @BeforeEach
+    void setUp() {
+        uniqueUUIDGenerator = new UniqueUUIDGenerator();
     }
 
     @Test
-    void whenGenerateWithgetMostSignificantBits_thenCollisionsProbabilityCheck() {
+    void whenGivenLeastSignificantBits_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
         for (int i = 0; i < n; i++) {
-            UUID uuid = UUID.randomUUID();
-            long uniqueValue = Math.abs(uuid.getMostSignificantBits());
-
+            long uniqueValue = uniqueUUIDGenerator.getLeastSignificantBits();
             assertTrue(uniqueValue > 0);
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
-        //assertTrue(collisions > 0);
-        //int uniqueCount = uniqueValues.size();
-        System.out.println("-------------------------------");
-        System.out.println("MostSignificantBits");
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format((double)collisions/n));
+        double collisionsProbability = (double) collisions / n;
+        assertTrue(collisionsProbability <= threshold);
+        System.out.println("Collisions Probability getLeastSignificantBits(): " + new DecimalFormat("#.#####").format(collisionsProbability));
     }
 
-
     @Test
-    void whenGenerateWithhashCode_thenCollisionsProbabilityCheck() {
+    void whenGivenMostSignificantBits_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
-
         for (int i = 0; i < n; i++) {
-            UUID uuid = UUID.randomUUID();
-            long uniqueValue = Math.abs(uuid.toString().hashCode());
-
+            long uniqueValue = uniqueUUIDGenerator.getMostSignificantBits();
             assertTrue(uniqueValue > 0);
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
-        assertTrue(collisions > 0);
-        //int uniqueCount = uniqueValues.size();
-        System.out.println("-------------------------------");
-        System.out.println("hashCode");
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format((double)collisions/n));
+        double collisionsProbability = (double) collisions / n;
+        assertTrue(collisionsProbability <= threshold);
+        System.out.println("Collisions Probability getMostSignificantBits(): " + new DecimalFormat("#.#####").format(collisionsProbability));
     }
 
 
     @Test
-    void ByteBufferTest() {
+    void whenGivenHashCode_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
-        for (int i = 0; i < n; i++) {
 
-            UUID uuid = UUID.randomUUID();
-            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-            bb.putLong(uuid.getMostSignificantBits());
-            bb.putLong(uuid.getLeastSignificantBits());
-            long uniqueValue = Math.abs(bb.getLong(0));
+        for (int i = 0; i < n; i++) {
+            long uniqueValue = uniqueUUIDGenerator.gethashCode();
             assertTrue(uniqueValue > 0);
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
-        //assertTrue(collisions > 0);
-        //int uniqueCount = uniqueValues.size();
-        System.out.println("-------------------------------");
-        System.out.println("ByteBuffer");
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format((double)collisions/n));
+        double collisionsProbability = (double) collisions / n;
+        assertTrue(collisionsProbability <= threshold);
+        System.out.println("Collisions Probability hashCode(): " + new DecimalFormat("#.#####").format(collisionsProbability));
+    }
+
+
+    @Test
+    void whenGivenByteBuffer_thenCollisionsCheck() {
+        Set<Long> uniqueValues = new HashSet<>();
+        int collisions = 0;
+        for (int i = 0; i < n; i++) {
+            long uniqueValue = uniqueUUIDGenerator.getByteBuffer();
+            assertTrue(uniqueValue > 0);
+            if (!uniqueValues.add(uniqueValue)) {
+                collisions++;
+            }
+        }
+        double collisionsProbability = (double) collisions / n;
+        assertTrue(collisionsProbability <= threshold);
+        System.out.println("Collisions Probability ByteBuffer : " + new DecimalFormat("#.#####").format(collisionsProbability));
     }
 }
