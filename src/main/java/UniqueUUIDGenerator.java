@@ -25,6 +25,14 @@ public class UniqueUUIDGenerator {
         return Math.abs(hashCode);
     }
 
+    public long getTimestamp(){
+        return UUID.randomUUID().timestamp();
+    }
+
+    public long getNode(){
+        return UUID.randomUUID().node();
+    }
+
     public long getByteBuffer(){
         UUID uuid = UUID.randomUUID();
         ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
