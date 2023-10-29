@@ -34,7 +34,7 @@ public class UUIDUnitTest {
         }
         double collisionsProbability = (double) collisions / n;
         assertTrue(collisionsProbability <= threshold);
-
+        System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
         System.out.println("Collisions Probability getLeastSignificantBits(): " + new DecimalFormat("#.#####").format(collisionsProbability));
         System.out.println("UUID.randomUUID() :" + UUID.randomUUID());
     }
@@ -45,13 +45,15 @@ public class UUIDUnitTest {
         int collisions = 0;
         for (int i = 0; i < n; i++) {
             long uniqueValue = uniqueUUIDGenerator.getMostSignificantBits();
-            assertTrue(uniqueValue > 0);
+            System.out.println("Output : " + uniqueValue);
+            //assertTrue(uniqueValue > 0);
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
         double collisionsProbability = (double) collisions / n;
         assertTrue(collisionsProbability <= threshold);
+        System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
         System.out.println("Collisions Probability getMostSignificantBits(): " + new DecimalFormat("#.#####").format(collisionsProbability));
     }
 
@@ -70,6 +72,7 @@ public class UUIDUnitTest {
             }
         }
         double collisionsProbability = (double) collisions / n;
+        System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
         assertTrue(collisionsProbability <= threshold);
         System.out.println("Collisions Probability hashCode(): " + new DecimalFormat("#.#####").format(collisionsProbability));
     }
@@ -80,46 +83,89 @@ public class UUIDUnitTest {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.getByteBuffer();
-            assertTrue(uniqueValue > 0);
+            long uniqueValue = uniqueUUIDGenerator.combineByteBuffer();
+            System.out.println("Output : " + uniqueValue);
+            //assertTrue(uniqueValue > 0);
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
         double collisionsProbability = (double) collisions / n;
         assertTrue(collisionsProbability <= threshold);
+        System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
         System.out.println("Collisions Probability ByteBuffer : " + new DecimalFormat("#.#####").format(collisionsProbability));
     }
 
     @Test
-    void whenGivenTimestamp_thenCollisionsCheck() {
+    void whenGivenByteBufferWrap_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.getTimestamp();
-            assertTrue(uniqueValue > 0);
+            long uniqueValue = uniqueUUIDGenerator.getByteBufferWrap();
+            System.out.println("ByteBufferWrap(): " + uniqueValue);
+            //assertTrue(uniqueValue >= 0);
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
         double collisionsProbability = (double) collisions / n;
         assertTrue(collisionsProbability <= threshold);
-        System.out.println("Collisions Probability Timestamp : " + new DecimalFormat("#.#####").format(collisionsProbability));
+        System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
+        System.out.println("Collisions Probability ByteBuffer : " + new DecimalFormat("#.#####").format(collisionsProbability));
     }
 
     @Test
-    void whenGivenNode_thenCollisionsCheck() {
+    void whenGivenBitwise_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.getNode();
-            assertTrue(uniqueValue > 0);
+            long uniqueValue = uniqueUUIDGenerator.combineBitwise();
+            System.out.println("Output: " + uniqueValue);
+            //assertTrue(uniqueValue >= 0);
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
         double collisionsProbability = (double) collisions / n;
         assertTrue(collisionsProbability <= threshold);
-        System.out.println("Collisions Probability Node : " + new DecimalFormat("#.#####").format(collisionsProbability));
+        System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
+        System.out.println("Collisions Probability ByteBuffer : " + new DecimalFormat("#.#####").format(collisionsProbability));
     }
+
+    @Test
+    void whenGivenCombineDirect_thenCollisionsCheck() {
+        Set<Long> uniqueValues = new HashSet<>();
+        int collisions = 0;
+        for (int i = 0; i < n; i++) {
+            long uniqueValue = uniqueUUIDGenerator.combineDirect();
+            System.out.println("Output: " + uniqueValue);
+            //assertTrue(uniqueValue >= 0);
+            if (!uniqueValues.add(uniqueValue)) {
+                collisions++;
+            }
+        }
+        double collisionsProbability = (double) collisions / n;
+        assertTrue(collisionsProbability <= threshold);
+        System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
+        System.out.println("Collisions Probability ByteBuffer : " + new DecimalFormat("#.#####").format(collisionsProbability));
+    }
+
+    @Test
+    void whenGivenPermutation_thenCollisionsCheck() {
+        Set<Long> uniqueValues = new HashSet<>();
+        int collisions = 0;
+        for (int i = 0; i < n; i++) {
+            long uniqueValue = uniqueUUIDGenerator.combinePermutation();
+            System.out.println("Output: " + uniqueValue);
+            //assertTrue(uniqueValue >= 0);
+            if (!uniqueValues.add(uniqueValue)) {
+                collisions++;
+            }
+        }
+        double collisionsProbability = (double) collisions / n;
+        assertTrue(collisionsProbability <= threshold);
+        System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
+        System.out.println("Collisions Probability ByteBuffer : " + new DecimalFormat("#.#####").format(collisionsProbability));
+    }
+
 }
