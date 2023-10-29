@@ -17,8 +17,8 @@ public class UniqueUUIDGenerator {
 
     public long getMostSignificantBits(){
         long mostSignificantBits = UUID.randomUUID().getMostSignificantBits();
-        return mostSignificantBits;
-        //return Math.abs(mostSignificantBits);
+        //return mostSignificantBits;
+        return Math.abs(mostSignificantBits);
     }
 
     public long gethashCode(){
@@ -32,8 +32,8 @@ public class UniqueUUIDGenerator {
         bb.putLong(uuid.getMostSignificantBits());
         bb.putLong(uuid.getLeastSignificantBits());
         bb.rewind(); // Kembalikan posisi buffer ke awal
-        return bb.getLong();
-        //return Math.abs(bb.getLong());
+        //return bb.getLong();
+        return Math.abs(bb.getLong());
     }
 
     public long getByteBufferWrap(){
@@ -50,20 +50,20 @@ public class UniqueUUIDGenerator {
         long mostSigBits = buffer.getLong();
         long leastSigBits = buffer.getLong();
         UUID reconstructedUUID = new UUID(mostSigBits, leastSigBits);
-        return reconstructedUUID.getMostSignificantBits();
-        //return Math.abs(reconstructedUUID.getMostSignificantBits());
+        //return reconstructedUUID.getMostSignificantBits();
+        return Math.abs(reconstructedUUID.getMostSignificantBits());
     }
 
     public long combineBitwise(){
         UUID uniqueUUID = UUID.randomUUID();
-        return  ((long) (uniqueUUID.getMostSignificantBits()) << 32) | (uniqueUUID.getLeastSignificantBits() & 0xFFFFFFFFL);
+        return Math.abs(((long) (uniqueUUID.getMostSignificantBits()) << 32) | (uniqueUUID.getLeastSignificantBits() & 0xFFFFFFFFL));
     }
 
     public long combineDirect(){
         UUID uniqueUUID = UUID.randomUUID();
         long mostSignificantBits = uniqueUUID.getMostSignificantBits();
         long leastSignificantBits = uniqueUUID.getLeastSignificantBits();
-        return mostSignificantBits ^ (leastSignificantBits >> 1);
+        return Math.abs(mostSignificantBits ^ (leastSignificantBits >> 1));
     }
 
     public long combinePermutation(){
@@ -81,6 +81,6 @@ public class UniqueUUIDGenerator {
         for (byte b : uuidBytes) {
             result = (result << 8) | (b & 0xFF);
         }
-        return result;
+        return Math.abs(result);
     }
 }
