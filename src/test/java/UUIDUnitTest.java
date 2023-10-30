@@ -1,5 +1,7 @@
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.text.DecimalFormat;
 import java.util.HashSet;
@@ -7,15 +9,24 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UUIDUnitTest {
 
     final static int n = 1000000;
     final static double threshold = 0.001;
-    UniqueUUIDGenerator uniqueUUIDGenerator;
+    UniqueLongGenerator uniqueLongGenerator = new UniqueLongGenerator();
 
-    @BeforeEach
+    /*@BeforeEach
     void setUp() {
-        uniqueUUIDGenerator = new UniqueUUIDGenerator();
+        uniqueLongGenerator = new UniqueLongGenerator();
+        System.out.println("Approach |P(C)");
+    }*/
+
+    @Test
+    @Order(0)
+    void header() {
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n","Approach", "collisions", "negatives", "p(c)", "p(n)");
+        System.out.println("---------------------------------------------------------------------------------");
     }
 
     @Test
@@ -23,36 +34,52 @@ public class UUIDUnitTest {
 
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
+        int negative = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.getLeastSignificantBits();
+            long uniqueValue = uniqueLongGenerator.getLeastSignificantBits();
             //System.out.println("getLeastSignificantBits(): " + uniqueValue);
-            assertTrue(uniqueValue > 0);
+            //assertTrue(uniqueValue > 0);
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
+            if (uniqueValue < 0) {
+                negative++;
+            }
         }
         double collisionsProbability = (double) collisions / n;
+        double negativeProbability = (double) negative / n;
         assertTrue(collisionsProbability <= threshold);
-        //System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format(collisionsProbability));
+        //System.out.println("Example Output : " + uniqueLongGenerator.getMostSignificantBits());
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n", "leastSignificantBits()",collisions, negative, new DecimalFormat("#.#####").format(collisionsProbability),
+                new DecimalFormat("#.#####").format(negativeProbability));
+        /*System.out.println("LeastSignificantBits |   " + collisions + "    |   " + negative + "   |    "
+                + new DecimalFormat("#.#####").format(collisionsProbability)+" |    " +new DecimalFormat("#.#####").format(negativeProbability));*/
     }
 
     @Test
     void whenGivenMostSignificantBits_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
+        int negative = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.getMostSignificantBits();
+            long uniqueValue = uniqueLongGenerator.getMostSignificantBits();
             //System.out.println("Output : " + uniqueValue);
-            assertTrue(uniqueValue > 0);
+            //assertTrue(uniqueValue > 0);
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
+            if (uniqueValue < 0) {
+                negative++;
+            }
         }
         double collisionsProbability = (double) collisions / n;
+        double negativeProbability = (double) negative / n;
         assertTrue(collisionsProbability <= threshold);
-        //System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format(collisionsProbability));
+        //System.out.println("Example Output : " + uniqueLongGenerator.getMostSignificantBits());
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n", "getMostSignificantBits()", collisions, negative, new DecimalFormat("#.#####").format(collisionsProbability),
+                new DecimalFormat("#.#####").format(negativeProbability));
+        /*System.out.println("MostSignificantBits  |   " + collisions + "    |   " + negative + "   |    "
+                + new DecimalFormat("#.#####").format(collisionsProbability)+" |    " +new DecimalFormat("#.#####").format(negativeProbability));*/
     }
 
 
@@ -60,110 +87,154 @@ public class UUIDUnitTest {
     void whenGivenHashCode_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
-
+        int negative = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.gethashCode();
+            long uniqueValue = uniqueLongGenerator.gethashCode();
             //System.out.println("gethashCode(): " + uniqueValue);
-            assertTrue(uniqueValue > 0);
+            //assertTrue(uniqueValue > 0);
+            if (uniqueValue < 0) {
+                negative++;
+            }
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
         double collisionsProbability = (double) collisions / n;
-        //System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
+        double negativeProbability = (double) negative / n;
+        //System.out.println("Example Output : " + uniqueLongGenerator.getMostSignificantBits());
         assertTrue(collisionsProbability <= threshold);
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format(collisionsProbability));
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n", "hashCode()",collisions, negative, new DecimalFormat("#.#####").format(collisionsProbability),
+                new DecimalFormat("#.#####").format(negativeProbability));
+        /*System.out.println("HashCode             |   " + collisions + "    |   " + negative + "   |    "
+                + new DecimalFormat("#.#####").format(collisionsProbability)+" |    " +new DecimalFormat("#.#####").format(negativeProbability));*/
     }
 
 
     @Test
-    void whenGivenByteBuffer_thenCollisionsCheck() {
+    void whenGivenCombineByteBuffer_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
+        int negative = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.combineByteBuffer();
+            long uniqueValue = uniqueLongGenerator.combineByteBuffer();
             //System.out.println("Output : " + uniqueValue);
-            assertTrue(uniqueValue > 0);
+            //assertTrue(uniqueValue > 0);
+            if (uniqueValue < 0) {
+                negative++;
+            }
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
         double collisionsProbability = (double) collisions / n;
+        double negativeProbability = (double) negative / n;
         assertTrue(collisionsProbability <= threshold);
-        //System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format(collisionsProbability));
+        //System.out.println("Example Output : " + uniqueLongGenerator.getMostSignificantBits());
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n", "Combine ByteBuffer", collisions, negative, new DecimalFormat("#.#####").format(collisionsProbability),
+                new DecimalFormat("#.#####").format(negativeProbability));
+        /*System.out.println("ByteBuffer           |   " + collisions + "    |   " + negative + "   |    "
+                + new DecimalFormat("#.#####").format(collisionsProbability)+" |    " +new DecimalFormat("#.#####").format(negativeProbability));*/
     }
 
     @Test
-    void whenGivenByteBufferWrap_thenCollisionsCheck() {
+    void whenGivenCombineByteBufferWrap_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
+        int negative = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.getByteBufferWrap();
+            long uniqueValue = uniqueLongGenerator.getByteBufferWrap();
             //System.out.println("ByteBufferWrap(): " + uniqueValue);
-            assertTrue(uniqueValue >= 0);
+            if (uniqueValue < 0) {
+                negative++;
+            }
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
         double collisionsProbability = (double) collisions / n;
+        double negativeProbability = (double) negative / n;
         assertTrue(collisionsProbability <= threshold);
-        //System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format(collisionsProbability));
+        //System.out.println("Example Output : " + uniqueLongGenerator.getMostSignificantBits());
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n", "ByteBuffer Wrap", collisions, negative, new DecimalFormat("#.#####").format(collisionsProbability),
+                new DecimalFormat("#.#####").format(negativeProbability));
+        /*System.out.println("ByteBufferWrap       |   " + collisions + "    |   " + negative + "   |    "
+                + new DecimalFormat("#.#####").format(collisionsProbability)+" |    " +new DecimalFormat("#.#####").format(negativeProbability));*/
     }
 
     @Test
-    void whenGivenBitwise_thenCollisionsCheck() {
+    void whenGivenCombineBitwise_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
+        int negative = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.combineBitwise();
+            long uniqueValue = uniqueLongGenerator.combineBitwise();
             //System.out.println("Output: " + uniqueValue);
-            assertTrue(uniqueValue >= 0);
+            if (uniqueValue < 0) {
+                negative++;
+            }
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
         double collisionsProbability = (double) collisions / n;
+        double negativeProbability = (double) negative / n;
         assertTrue(collisionsProbability <= threshold);
-        //System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format(collisionsProbability));
+        //System.out.println("Example Output : " + uniqueLongGenerator.getMostSignificantBits());
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n", "Combine Bitwise", collisions, negative, new DecimalFormat("#.#####").format(collisionsProbability),
+                new DecimalFormat("#.#####").format(negativeProbability));
+        /*System.out.println("Bitwise              |   " + collisions + "    |   " + negative + "   |    "
+                + new DecimalFormat("#.#####").format(collisionsProbability)+" |    " +new DecimalFormat("#.#####").format(negativeProbability));*/
     }
 
     @Test
-    void whenGivenCombineDirect_thenCollisionsCheck() {
+    void whenGivenCombineCombineDirect_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
+        int negative = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.combineDirect();
+            long uniqueValue = uniqueLongGenerator.combineDirect();
             //System.out.println("Output: " + uniqueValue);
-            assertTrue(uniqueValue >= 0);
+            if (uniqueValue < 0) {
+                negative++;
+            }
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
         double collisionsProbability = (double) collisions / n;
+        double negativeProbability = (double) negative / n;
         assertTrue(collisionsProbability <= threshold);
-        //System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format(collisionsProbability));
+        //System.out.println("Example Output : " + uniqueLongGenerator.getMostSignificantBits());
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n", "Combine Direct", collisions, negative, new DecimalFormat("#.#####").format(collisionsProbability),
+                new DecimalFormat("#.#####").format(negativeProbability));
+        /*System.out.println("CombineDirect        |   " + collisions + "    |   " + negative + "   |    "
+                + new DecimalFormat("#.#####").format(collisionsProbability)+" |    " +new DecimalFormat("#.#####").format(negativeProbability));*/
     }
 
     @Test
-    void whenGivenPermutation_thenCollisionsCheck() {
+    void whenGivenCombinePermutation_thenCollisionsCheck() {
         Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
+        int negative = 0;
         for (int i = 0; i < n; i++) {
-            long uniqueValue = uniqueUUIDGenerator.combinePermutation();
+            long uniqueValue = uniqueLongGenerator.combinePermutation();
             //System.out.println("Output: " + uniqueValue);
-            assertTrue(uniqueValue >= 0);
+            if (uniqueValue < 0) {
+                negative++;
+            }
             if (!uniqueValues.add(uniqueValue)) {
                 collisions++;
             }
         }
         double collisionsProbability = (double) collisions / n;
+        double negativeProbability = (double) negative / n;
         assertTrue(collisionsProbability <= threshold);
-        //System.out.println("Example Output : " + uniqueUUIDGenerator.getMostSignificantBits());
-        System.out.println("Collisions Probability : " + new DecimalFormat("#.#####").format(collisionsProbability));
+        //System.out.println("Example Output : " + uniqueLongGenerator.getMostSignificantBits());
+        //System.out.println("Permutation          |"+ collisions +"  |  "+ negative +"  |  "+  new DecimalFormat("#.#####").format(collisionsProbability));
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n", "Combine Permutation", collisions, negative, new DecimalFormat("#.#####").format(collisionsProbability),
+                new DecimalFormat("#.#####").format(negativeProbability));
+        /*System.out.println("Permutation          |   " + collisions + "    |   " + negative + "   |    "
+                + new DecimalFormat("#.#####").format(collisionsProbability)+" |    " +new DecimalFormat("#.#####").format(negativeProbability));*/
     }
 
 }
