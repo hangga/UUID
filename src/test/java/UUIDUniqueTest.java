@@ -1,82 +1,55 @@
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.nio.ByteBuffer;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UUIDUniqueTest {
-    static int n = 1000000;
-    private Set<Long> uniqueValues;
-
-    @BeforeEach
-    void setUp() {
-        uniqueValues = new HashSet<>();
-    }
+    final static int n = 1000000;
+    final static double threshold = 0.001;
+    UUIDLongGenerator UUIDLongGenerator = new UUIDLongGenerator();
+    DecimalFormat decimalFormat = new DecimalFormat("#.#####");
 
     @Test
-    void testGetLeastSignificantBits() {
-        int collisions = 0;
-        for (int i = 0; i < n; i++) {
-            UUID uuid = UUID.randomUUID();
-            long uniqueValue = Math.abs(uuid.getLeastSignificantBits());
-
-            if (!uniqueValues.add(uniqueValue)) {
-                collisions++;
-            }
+    void whenForeachGenerateLongValue_thenCollisionsCheck() {
+        printTableHeader();
+        Class<?> objClass = UUIDLongGenerator.getClass();
+        Method[] methods = objClass.getDeclaredMethods();
+        for (Method method : methods) {
+            collisionCheck(method);
         }
-        System.out.println("Collisions : " + (double)collisions/n);
-        assertTrue(collisions < n * 0.01); // You can adjust the threshold as needed
     }
 
-    @Test
-    void testGetMostSignificantBits() {
-        int collisions = 0;
-        for (int i = 0; i < n; i++) {
-            UUID uuid = UUID.randomUUID();
-            long uniqueValue = Math.abs(uuid.getMostSignificantBits());
-
-            if (!uniqueValues.add(uniqueValue)) {
-                collisions++;
-            }
-        }
-        System.out.println("Collisions : " + collisions /n);
-        assertTrue(collisions < n * 0.01); // You can adjust the threshold as needed
+    private void printTableHeader() {
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n", "Approach/method", "collisions", "negatives", "p(c)", "p(n");
+        System.out.println("------------------------------------------------------------------------------");
     }
 
-    @Test
-    void testHashCode() {
+    private void collisionCheck(Method method) {
+        Set<Long> uniqueValues = new HashSet<>();
         int collisions = 0;
+        int negative = 0;
         for (int i = 0; i < n; i++) {
-            UUID uuid = UUID.randomUUID();
-            long uniqueValue = Math.abs(uuid.toString().hashCode());
-
-            if (!uniqueValues.add(uniqueValue)) {
-                collisions++;
+            try {
+                long uniqueValue = (long) method.invoke(UUIDLongGenerator);
+                if (!uniqueValues.add(uniqueValue)) {
+                    collisions++;
+                }
+                if (uniqueValue < 0) {
+                    negative++;
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
             }
         }
-        System.out.println("Collisions : " + collisions /n);
-        assertTrue(collisions < n * 0.01); // You can adjust the threshold as needed
-    }
-
-    @Test
-    void testByteBuffer() {
-        int collisions = 0;
-        for (int i = 0; i < n; i++) {
-            UUID uuid = UUID.randomUUID();
-            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-            bb.putLong(uuid.getMostSignificantBits());
-            bb.putLong(uuid.getLeastSignificantBits());
-            long uniqueValue = Math.abs(bb.getLong(0));
-
-            if (!uniqueValues.add(uniqueValue)) {
-                collisions++;
-            }
-        }
-        System.out.println("Collisions : " + (double)collisions/n);
-        assertTrue(collisions < n * 0.01); // You can adjust the threshold as needed
+        double collisionsProbability = (double) collisions / n;
+        double negativeProbability = (double) negative / n;
+        assertTrue(collisionsProbability <= threshold);
+        System.out.format("%-30s %-12s %-12s %-10s %-10s%n", method.getName(), collisions, negative,
+                decimalFormat.format(collisionsProbability), decimalFormat.format(negativeProbability));
     }
 }
