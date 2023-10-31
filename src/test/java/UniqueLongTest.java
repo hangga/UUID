@@ -14,17 +14,15 @@ public class UniqueLongTest {
 
     private final static int n = 1000000;
 
-    private void printTableHeader(){
+    private void printTableHeader() {
         System.out.format("%-30s %-15s %-15s %-15s %-15s%n", "Approach", "collisions", "negatives", "collision", "negative");
         System.out.format("%-30s %-15s %-15s %-15s %-15s%n", "(method name)", "count", "count", "probability", "probability");
         System.out.println("--------------------------------------------------------------------------------------------");
     }
 
-    private void printOutput(String method, int collisionsCount, int negativeCount, double collisionsProbability, double negativeProbability){
+    private void printOutput(String method, int collisionsCount, int negativeCount, double collisionsProbability, double negativeProbability) {
         DecimalFormat decimalFormat = new DecimalFormat("#.#####");
-        System.out.format("%-30s %-15s %-15s %-15s %-15s%n", method, collisionsCount, negativeCount,
-                decimalFormat.format(collisionsProbability),
-                decimalFormat.format(negativeProbability));
+        System.out.format("%-30s %-15s %-15s %-15s %-15s%n", method, collisionsCount, negativeCount, decimalFormat.format(collisionsProbability), decimalFormat.format(negativeProbability));
     }
 
     @Test
@@ -58,8 +56,8 @@ public class UniqueLongTest {
         });
     }
 
-    /*@Test
-    void forEachMethod_generatedLongValue_checkCollisions() {
+    @Test
+    void forEachMethod_generatedLongValue_checkCollisions2() {
         printTableHeader();
         UUIDLongGenerator uuidLongGenerator = new UUIDLongGenerator();
         Arrays.stream(uuidLongGenerator.getClass().getDeclaredMethods()).forEach(method -> {
@@ -87,5 +85,5 @@ public class UniqueLongTest {
 
             assertTrue(collisionsProbability <= 0.001); // threshold = 0.001
         });
-    }*/
+    }
 }
